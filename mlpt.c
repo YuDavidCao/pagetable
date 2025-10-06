@@ -2,7 +2,9 @@
 
 #include "mlpt.h"
 
+#include <assert.h>
 #include <math.h>
+#include <stdalign.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +18,6 @@
 #define BIT_PER_TABLE_LEVEL (POBITS - PTE_BITS)
 
 size_t ptbr = 0;
-size_t page_size = 0;
 
 int is_valid(size_t a) {
     return a & 1;
@@ -42,14 +43,14 @@ size_t extract_vpn_part(size_t va, size_t level) {
 size_t allocate_memory() {
     void* ptr;
 
-    int result = posix_memalign(&ptr, page_size, page_size);
+    int result = posix_memalign(&ptr, pow(2, POBITS), pow(2, POBITS));
 
     if (result != 0) {
         fprintf(stderr, "posix_memalign failed: %d\n", result);
         return 0;
     }
 
-    memset(ptr, 0, page_size);
+    memset(ptr, 0, pow(2, POBITS));
 
     return (size_t)ptr;
 }
@@ -58,8 +59,9 @@ size_t translate(size_t va) {
     if (!ptbr) {
         return ~(size_t)0;
     }
-    
+
     size_t offset = extract_offset(va);
+
     size_t* cur = (size_t*)ptbr;
 
     for (size_t i = 0; i < LEVELS; i++) {
@@ -72,7 +74,7 @@ size_t translate(size_t va) {
         }
     }
 
-    return (size_t)(cur + offset);
+    return (size_t)cur | offset;
 }
 
 int allocate_page(size_t va) {
@@ -107,7 +109,5 @@ int allocate_page(size_t va) {
 }
 
 int main() {
-    page_size = pow(2, POBITS);
-    printf("Bits needed for each level: %zu\n", page_size);
     return 0;
 }
