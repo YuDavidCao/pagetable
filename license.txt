@@ -1,0 +1,7 @@
+Licenses considered:
+
+GPL: this license seems too restrictive for this project as it requires derived works to be open source and licensed under the GPL as well.
+
+MIT License: this license has very little restrictions on the use of the software, basically just requires attribution for the original work for its derivatives. This seems like a good fit for this project as it is also one of the most commonly used licenses for open source software.
+
+Apache: this license also has very little restrictions on the use of the software, however different from the MIT License, this license provides additional patent protection and requires that any modifications to the original work be clearly marked. It also includes a patent grant that protects users from patent litigation. This license seems a bit to formal and commercial for this homework project.
