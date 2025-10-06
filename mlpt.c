@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
 
@@ -38,29 +39,71 @@ size_t extract_vpn_part(size_t va, size_t level) {
     return (va >> shift_amount) & construct_mask(BIT_PER_TABLE_LEVEL);
 }
 
-void page_table_init() {
-    void *ptr;
+size_t allocate_memory() {
+    void* ptr;
 
     int result = posix_memalign(&ptr, page_size, page_size);
 
     if (result != 0) {
         fprintf(stderr, "posix_memalign failed: %d\n", result);
-        return;
+        return 0;
     }
 
     memset(ptr, 0, page_size);
 
-    ptbr = (size_t)ptr;
+    return (size_t)ptr;
 }
 
-int allocate_page(size_t va) {
+size_t translate(size_t va) {
     if (!ptbr) {
-        page_table_init();
+        return ~(size_t)0;
     }
+    
+    size_t offset = extract_offset(va);
+    size_t* cur = (size_t*)ptbr;
 
     for (size_t i = 0; i < LEVELS; i++) {
         size_t vpn = extract_vpn_part(va, i);
+        size_t data = cur[vpn];
+        if (is_valid(data)) {
+            cur = (size_t*)(data & (~(size_t)1));
+        } else {
+            return ~(size_t)0;
+        }
     }
+
+    return (size_t)(cur + offset);
+}
+
+int allocate_page(size_t va) {
+    if (extract_offset(va) != 0) {
+        return -1;
+    }
+
+    if (!ptbr) {
+        ptbr = allocate_memory();
+    }
+
+    size_t* cur = (size_t*)ptbr;
+
+    int is_allocated = 0;
+
+    for (size_t i = 0; i < LEVELS; i++) {
+        size_t vpn = extract_vpn_part(va, i);
+
+        size_t data = cur[vpn];
+
+        if (is_valid(data)) {
+            cur = (size_t*)(data & (~(size_t)1));
+        } else {
+            is_allocated = 1;
+            size_t new_addr = allocate_memory();
+            cur[vpn] = new_addr | 1;
+            cur = (size_t*)new_addr;
+        }
+    }
+
+    return is_allocated;
 }
 
 int main() {
