@@ -1,0 +1,50 @@
+# Project Description
+
+This is a simple page table implementation in C.
+
+# How to run
+
+```
+make
+./pagetable
+```
+
+# How to customize 
+
+Edit `config.h` to change the number of levels and page offset bits:
+
+```c
+#define LEVELS  1 // edit this to change the number of levels
+#define POBITS  12 // edit this to change the number of page offset bits
+```
+
+Valid values for LEVELS are 1 to 6 and for POBITS are 4 to 18.
+
+# Implementation on deallocate_page
+
+function header:
+
+```c
+int deallocate_page(size_t va);
+```
+
+The deallocate_page function deallocates the virtual page at the given virtual address. 
+
+The function itself uses a similar logic to the allocate_page function, but instead of allocating a new page, it calls the `free` function to free the page at the given virtual address.
+
+# License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+# Acknowledgments
+
+Special thanks to Aryan Tiwari (haf7ar) for reviewing my code and providing valuable feedback.
+Special thanks to TA Dominic for helping me understand the project requirements and providing guidance.
+
+# Known bugs
+
+- None
+
+# Limitations
+
+- The code does not fail gracefully if the posix_memalign fails.

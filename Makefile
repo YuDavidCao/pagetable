@@ -1,12 +1,18 @@
 CC = gcc
 CFLAGS = -O1 -Wall -Wextra
-TARGET = mlpt
+LIBRARY = libmlpt.a
 SOURCES = mlpt.c
+OBJECTS = mlpt.o
 
-$(TARGET): $(SOURCES)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCES)
+all: $(LIBRARY)
+
+$(LIBRARY): $(OBJECTS)
+	ar rcs $(LIBRARY) $(OBJECTS)
+
+mlpt.o: mlpt.c mlpt.h config.h
+	$(CC) $(CFLAGS) -c mlpt.c -o mlpt.o
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(OBJECTS) $(LIBRARY)
 
-.PHONY: clean
+.PHONY: all clean

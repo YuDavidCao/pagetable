@@ -29,3 +29,12 @@ size_t translate(size_t va);
  * setup, the function should do nothing.)
  */
 int allocate_page(size_t va);
+
+/**
+ * Deallocates the virtual page which starts at virtual address `start_va`.
+ *
+ * If `start_va` is not the address at the start of a page, returns `-1`.
+ * If `start_va` is the address at the start of a page, but the
+ * page is not allocated, returns `0`; otherwise, returns `1`.
+ */
+int deallocate_page(size_t va);
